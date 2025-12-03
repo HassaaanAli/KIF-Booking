@@ -41,8 +41,14 @@
     <main class="px-10 py-8">
         <!-- Page Title -->
         <div class="mb-6">
-            <h1 class="mb-2 text-3xl font-bold text-gray-900">Tech Conference 2025</h1>
-            <p class="text-gray-600">Select your booth location on the interactive floor map</p>
+            <h1 class="mb-2 text-3xl font-bold text-gray-900">{{ $event?->name ?? 'No Event Available' }}</h1>
+            <p class="text-gray-600">
+                @if($hall)
+                    {{ $hall->name }} - Select your booth location on the interactive floor map
+                @else
+                    No halls available for this event
+                @endif
+            </p>
         </div>
 
         <!-- Legend -->
@@ -193,7 +199,8 @@
             }
 
             const floormap = document.getElementById('floormap');
-            fetch('/img/fm.svg')
+            @if($hall && $hall->getFirstMediaUrl('floor_map'))
+            fetch('{{ $hall->getFirstMediaUrl('floor_map') }}')
                 .then(response => response.text())
                 .then(svgData => {
                     floormap.innerHTML = svgData;
@@ -202,6 +209,9 @@
                 .catch(error => {
                     console.error('Error loading floormap:', error);
                 });
+            @else
+            floormap.innerHTML = '<p class="p-8 text-gray-500">No floor map available for this hall</p>';
+            @endif
 
             // Wait a bit for the SVG to be inserted into DOM
             setTimeout(() => {
