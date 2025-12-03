@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\SubmissionCreated;
 use App\Models\Event;
 use App\Models\Submission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class HomeController extends Controller
 {
@@ -60,11 +63,22 @@ class HomeController extends Controller
                 ->withInput();
         }
 
-        Submission::create([
+        $submission = Submission::create([
             ...$validated,
             'booth_name' => $validated['booth_id'], // Use booth ID as name
             'status' => 'pending',
         ]);
+
+        // Send email notification to admin (queued for fast response)
+        try {
+            $adminEmail = config('mail.admin_email');
+            if ($adminEmail) {
+                Mail::to($adminEmail)->queue(new SubmissionCreated($submission));
+            }
+        } catch (\Exception $e) {
+            // Log the error but don't block the submission
+            Log::error('Failed to queue submission email notification: '.$e->getMessage());
+        }
 
         return redirect()->back()
             ->with('success', 'Your booth submission has been received successfully! We will contact you soon.');
