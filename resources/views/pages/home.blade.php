@@ -21,20 +21,17 @@
             <div class="flex items-center justify-between">
                 <!-- Logo -->
                 <div class="flex items-center space-x-3">
-                    <svg class="w-8 h-8 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
-                        </path>
-                    </svg>
-                    <span class="text-xl font-semibold text-gray-900">Kuwait International Fair</span>
+                    <img src="/img/header.svg" alt="" srcset="">
                 </div>
 
                 <!-- Navigation -->
                 <nav class="flex items-center space-x-8">
-                    <a href="#"
-                        class="text-sm font-medium text-gray-700 transition-colors hover:text-gray-900">Events</a>
-                    <a href="#" class="text-sm font-medium text-gray-700 transition-colors hover:text-gray-900">My
-                        Bookings</a>
+                    <a href="#" class="text-sm font-medium text-gray-700 transition-colors hover:text-gray-900">
+                        Events
+                    </a>
+                    <a href="#" class="text-sm font-medium text-gray-700 transition-colors hover:text-gray-900">
+                        My Bookings
+                    </a>
                 </nav>
             </div>
         </div>
@@ -78,8 +75,10 @@
         <div class="px-4 pt-12 pb-6 mx-auto sm:px-6 lg:px-10">
             <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
                 <!-- Column 1: Kuwait International Fair -->
-                <div>
-                    <h3 class="mb-4 text-sm font-semibold text-gray-900">Kuwait International Fair</h3>
+                <div class="flex flex-col items-start justify-start gap-4">
+                    <div class="flex items-center space-x-3">
+                        <img src="/img/header.svg" alt="" srcset="">
+                    </div>
                     <p class="text-sm text-gray-600">
                         Professional event booth booking platform for conferences and exhibitions.
                     </p>
