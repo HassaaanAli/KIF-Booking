@@ -39,6 +39,24 @@
 
     <!-- Main Content -->
     <main class="px-10 py-8">
+        <!-- Success Message -->
+        @if (session('success'))
+            <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <p class="text-green-800">{{ session('success') }}</p>
+            </div>
+        @endif
+
+        <!-- Error Messages -->
+        @if ($errors->any())
+            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <ul class="list-disc list-inside text-red-800">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <!-- Page Title -->
         <div class="mb-6">
             <h1 class="mb-2 text-3xl font-bold text-gray-900">{{ $event?->name ?? 'No Event Available' }}</h1>
@@ -158,15 +176,56 @@
     <div id="blockDialog" class="fixed inset-0 z-50 items-center justify-center hidden bg-opacity-50 bg-black/35">
         <div class="w-full max-w-md mx-4 bg-white rounded-lg shadow-xl">
             <div class="flex items-center justify-between px-6 py-4 border-b">
-                <h3 class="text-xl font-semibold text-gray-900">Block ID: <span id="dialogBlockId"></span></h3>
-                <button id="closeDialog" class="text-2xl text-gray-400 hover:text-gray-600">&times;</button>
+                <h3 class="text-xl font-semibold text-gray-900">Booth: <span id="dialogBlockId"></span></h3>
+                <button id="closeDialog" type="button" class="text-2xl text-gray-400 hover:text-gray-600">&times;</button>
             </div>
 
-            <div class="px-6 py-4">
-                <div id="dialogContent">
-                    <p class="mb-4 text-gray-600">Add your form content here</p>
+            <form id="submissionForm" action="{{ route('submissions.store') }}" method="POST" class="px-6 py-4">
+                @csrf
+                <input type="hidden" name="event_id" value="{{ $event?->id }}">
+                <input type="hidden" name="hall_id" value="{{ $hall?->id }}">
+                <input type="hidden" id="booth_id" name="booth_id" value="">
+
+                <div class="space-y-4">
+                    <div>
+                        <label for="phone_number" class="block mb-2 text-sm font-medium text-gray-700">
+                            Phone Number <span class="text-red-500">*</span>
+                        </label>
+                        <input type="tel" id="phone_number" name="phone_number" required
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="+965 XXXX XXXX">
+                    </div>
+
+                    <div>
+                        <label for="email" class="block mb-2 text-sm font-medium text-gray-700">
+                            Email (Optional)
+                        </label>
+                        <input type="email" id="email" name="email"
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="example@domain.com">
+                    </div>
+
+                    <div>
+                        <label for="company_name" class="block mb-2 text-sm font-medium text-gray-700">
+                            Company Name (Optional)
+                        </label>
+                        <input type="text" id="company_name" name="company_name"
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Your company name">
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-4">
+                        <button type="button" id="cancelBtn"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                            Submit Request
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -252,8 +311,13 @@
                                 const dialog = document.getElementById('blockDialog');
                                 const dialogBlockId = document.getElementById(
                                     'dialogBlockId');
+                                const boothIdInput = document.getElementById('booth_id');
 
+                                // Set booth ID in dialog title and hidden input
                                 dialogBlockId.textContent = blockId;
+                                boothIdInput.value = blockId;
+
+                                // Show dialog
                                 dialog.classList.remove('hidden');
                                 dialog.classList.add('flex');
                             });
@@ -265,17 +329,23 @@
             // Close dialog functionality
             const dialog = document.getElementById('blockDialog');
             const closeBtn = document.getElementById('closeDialog');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const submissionForm = document.getElementById('submissionForm');
 
-            closeBtn.addEventListener('click', function() {
+            function closeDialog() {
                 dialog.classList.add('hidden');
                 dialog.classList.remove('flex');
-            });
+                // Reset form
+                submissionForm.reset();
+            }
+
+            closeBtn.addEventListener('click', closeDialog);
+            cancelBtn.addEventListener('click', closeDialog);
 
             // Close dialog when clicking outside
             dialog.addEventListener('click', function(e) {
                 if (e.target === dialog) {
-                    dialog.classList.add('hidden');
-                    dialog.classList.remove('flex');
+                    closeDialog();
                 }
             });
         });

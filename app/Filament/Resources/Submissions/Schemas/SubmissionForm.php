@@ -40,12 +40,6 @@ class SubmissionForm
                             ->placeholder('e.g., A1, B2')
                             ->helperText('The booth identifier from the floor map')
                             ->columnSpanFull(),
-
-                        TextInput::make('booth_name')
-                            ->maxLength(255)
-                            ->label('Booth Name')
-                            ->placeholder('Optional display name')
-                            ->columnSpanFull(),
                     ])
                     ->columns(2),
 
