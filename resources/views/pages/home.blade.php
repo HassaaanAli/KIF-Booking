@@ -15,9 +15,139 @@
 @endsection
 
 @section('content')
-    <div class="flex flex-col items-center justify-start w-full h-full">
-        <div id="floormap" class="flex items-center justify-center w-full bg-black aspect-video"></div>
-    </div>
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200">
+        <div class="px-4 py-4 mx-auto sm:px-6 lg:px-10">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <svg class="w-8 h-8 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                        </path>
+                    </svg>
+                    <span class="text-xl font-semibold text-gray-900">Kuwait International Fair</span>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="flex items-center space-x-8">
+                    <a href="#"
+                        class="text-sm font-medium text-gray-700 transition-colors hover:text-gray-900">Events</a>
+                    <a href="#" class="text-sm font-medium text-gray-700 transition-colors hover:text-gray-900">My
+                        Bookings</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="px-10 py-8">
+        <!-- Page Title -->
+        <div class="mb-6">
+            <h1 class="mb-2 text-3xl font-bold text-gray-900">Tech Conference 2025</h1>
+            <p class="text-gray-600">Select your booth location on the interactive floor map</p>
+        </div>
+
+        <!-- Legend -->
+        <div class="flex flex-wrap gap-6 mb-6">
+            <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="radio" name="status" value="all"
+                    class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" checked>
+                <span class="text-sm text-gray-700">All</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="radio" name="status" value="available"
+                    class="w-4 h-4 text-gray-600 border-gray-300 focus:ring-gray-500">
+                <span class="text-sm text-gray-700">Available</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="radio" name="status" value="booked"
+                    class="w-4 h-4 text-red-600 border-gray-300 focus:ring-red-500">
+                <span class="text-sm text-gray-700">Booked</span>
+            </label>
+        </div>
+
+        <!-- Floor Map -->
+        <div class="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm">
+            <div id="floormap" class="flex items-center justify-center w-full p-4 bg-gray-50"></div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-16 bg-white border-t border-gray-200">
+        <div class="px-4 pt-12 pb-6 mx-auto sm:px-6 lg:px-10">
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+                <!-- Column 1: Kuwait International Fair -->
+                <div>
+                    <h3 class="mb-4 text-sm font-semibold text-gray-900">Kuwait International Fair</h3>
+                    <p class="text-sm text-gray-600">
+                        Professional event booth booking platform for conferences and exhibitions.
+                    </p>
+                </div>
+
+                <!-- Column 2: Platform -->
+                <div>
+                    <h3 class="mb-4 text-sm font-semibold text-gray-900">Platform</h3>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="#" class="text-sm text-gray-600 transition-colors hover:text-gray-900">
+                                Browse Events
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Column 3: Support -->
+                <div>
+                    <h3 class="mb-4 text-sm font-semibold text-gray-900">Support</h3>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="#" class="text-sm text-gray-600 transition-colors hover:text-gray-900">
+                                Help Center
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-sm text-gray-600 transition-colors hover:text-gray-900">
+                                Contact Us
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-sm text-gray-600 transition-colors hover:text-gray-900">
+                                Guidelines
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Column 4: Legal -->
+                <div>
+                    <h3 class="mb-4 text-sm font-semibold text-gray-900">Legal</h3>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="#" class="text-sm text-gray-600 transition-colors hover:text-gray-900">Terms of
+                                Service
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-sm text-gray-600 transition-colors hover:text-gray-900">Privacy
+                                Policy
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-sm text-gray-600 transition-colors hover:text-gray-900">
+                                Cancellation
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="pt-8 mt-8 border-t border-gray-200">
+                <p class="text-sm text-center text-gray-600">&copy; 2025 Kuwait International Fair. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 
     <!-- Dialog Modal -->
     <div id="blockDialog" class="fixed inset-0 z-50 items-center justify-center hidden bg-opacity-50 bg-black/35">
@@ -28,7 +158,6 @@
             </div>
 
             <div class="px-6 py-4">
-                <!-- Add your form here -->
                 <div id="dialogContent">
                     <p class="mb-4 text-gray-600">Add your form content here</p>
                 </div>
@@ -36,16 +165,39 @@
         </div>
     </div>
 
-
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Handle status radio button changes
+            const statusRadios = document.querySelectorAll('input[name="status"]');
+            statusRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('status', this.value);
+                    window.history.pushState({}, '', url);
+                });
+            });
+
+            // Set the correct radio button based on URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const statusParam = urlParams.get('status');
+
+            if (statusParam) {
+                const radio = document.querySelector(`input[name="status"][value="${statusParam}"]`);
+                if (radio) {
+                    radio.checked = true;
+                }
+            } else {
+                // Default to 'all' if no status parameter
+                const url = new URL(window.location.href);
+                url.searchParams.set('status', 'all');
+                window.history.replaceState({}, '', url);
+            }
+
             const floormap = document.getElementById('floormap');
             fetch('/img/fm.svg')
                 .then(response => response.text())
                 .then(svgData => {
                     floormap.innerHTML = svgData;
-
                     console.log('floormap loaded successfully');
                 })
                 .catch(error => {
@@ -54,7 +206,6 @@
 
             // Wait a bit for the SVG to be inserted into DOM
             setTimeout(() => {
-                // Get all <g> elements with IDs inside the SVG, excluding the parent "Floor Map"
                 const svgElement = floormap.querySelector('svg');
                 if (svgElement) {
                     const floorMapGroup = svgElement.querySelector('g#Floor\\ Map, g[id="Floor Map"]');
@@ -70,7 +221,7 @@
                             // Store original colors
                             const originalFill = '#7F7F7F';
                             const originalOpacity = '0.5';
-                            const hoverFill = '#4A90E2'; // Blue hover color
+                            const hoverFill = '#3B82F6'; // Blue hover color to match legend
                             const hoverOpacity = '0.8';
 
                             // Add mouseenter event
