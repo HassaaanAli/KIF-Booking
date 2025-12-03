@@ -43,9 +43,8 @@ class EventsTable
                     ->label('Start Date')
                     ->dateTime('M d, Y H:i')
                     ->sortable()
-                    ->description(fn ($record) =>
-                        $record->starts_at > now()
-                            ? 'Starts ' . $record->starts_at->diffForHumans()
+                    ->description(fn ($record) => $record->starts_at > now()
+                            ? 'Starts '.$record->starts_at->diffForHumans()
                             : ($record->ends_at < now() ? 'Ended' : 'In Progress')
                     ),
 

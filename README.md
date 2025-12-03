@@ -1,59 +1,202 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Kuwait International Fair - Booth Booking System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A modern event booth booking platform built with Laravel 12 and Filament 4, featuring interactive SVG floor maps for intuitive booth selection and management.
 
-## About Laravel
+![KIF Booking System](assets/home.png)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- 🗺️ **Interactive Floor Maps** - Dynamic SVG-based floor plans with real-time booth visualization
+- 📅 **Event Management** - Create and manage multiple events with custom dates and statuses
+- 🏛️ **Multi-Hall Support** - Each event can span multiple exhibition halls
+- 📝 **Booth Submissions** - Anonymous booth booking requests without user authentication
+- ✅ **Approval Workflow** - Admin panel for reviewing and approving/rejecting submissions
+- 🔒 **SVG Sanitization** - Server-side sanitization of uploaded floor maps for security
+- 📱 **Responsive Design** - Built with Tailwind CSS v4 for mobile and desktop
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Quick Start
 
-## Learning Laravel
+### Prerequisites
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- PHP 8.2 or higher
+- Composer
+- Node.js & npm
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Installation
 
-## Laravel Sponsors
+```bash
+# Clone the repository
+git clone <repository-url>
+cd KIF-Booking
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# Run complete setup (dependencies, env, migrations, assets)
+composer setup
+```
 
-### Premium Partners
+### Development
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```bash
+# Start all development services (web server, queue, logs, Vite)
+composer dev
+```
+
+This starts:
+
+- Laravel development server at `http://localhost:8000`
+- Vite dev server with hot module replacement
+- Queue worker for background jobs
+- Laravel Pail for log streaming
+
+### Running Services Individually
+
+```bash
+php artisan serve        # Web server
+npm run dev              # Vite dev server
+php artisan queue:work   # Queue worker
+```
+
+## Architecture
+
+### Public Interface
+
+**Home Page** (`/`) - Event browsing and booth selection
+
+- Displays active events with their exhibition halls
+- Interactive SVG floor map with booth selection
+- Filter booths by availability status
+- Submit booking requests with contact information
+
+### Admin Panel
+
+**Filament Admin** (`/admin`) - Complete management interface
+
+- **Events**: Create/edit events with date ranges and status management
+- **Halls**: Upload SVG floor maps and manage exhibition halls
+- **Submissions**: Review, approve, or reject booth booking requests
+- Bulk actions for efficient submission processing
+
+### Domain Model
+
+```
+Event (many-to-many) ↔ Hall
+  ↓                      ↓
+Submission ←────────────┘
+
+- Events have multiple Halls
+- Halls can be used by multiple Events
+- Submissions link specific booths to Event/Hall combinations
+- Booths are SVG elements (not database records)
+```
+
+## Technology Stack
+
+- **Backend**: Laravel 12 with PHP 8.2+
+- **Admin Panel**: Filament 4
+- **Frontend**: Tailwind CSS v4 + Vite
+- **Database**: SQLite (default) with database-backed queues/cache
+- **Testing**: Pest PHP
+- **Media Storage**: Spatie Laravel MediaLibrary
+- **Code Quality**: Laravel Pint
+
+## Database
+
+Default configuration uses SQLite for simplicity. Change database settings in `.env` as needed.
+
+```bash
+php artisan migrate              # Run migrations
+php artisan migrate:fresh        # Fresh start
+php artisan migrate:fresh --seed # With seed data
+```
+
+## Code Quality
+
+```bash
+./vendor/bin/pint        # Format code
+./vendor/bin/pint --test # Check formatting
+```
+
+## Key Features Explained
+
+### Interactive Floor Maps
+
+Floor maps are SVG files uploaded through the Filament admin panel. The system:
+
+1. Sanitizes uploaded SVGs server-side to prevent XSS attacks
+2. Stores them via Spatie MediaLibrary
+3. Dynamically loads them on the public interface
+4. Makes booth elements (SVG `<g>` tags) interactive with JavaScript
+5. Booth IDs come directly from SVG element `id` attributes
+
+**SVG Structure Requirements:**
+
+- Interactive booth elements must be grouped under `g#Floor Map`
+- Each booth should be a `<g>` element with a unique `id` attribute
+
+### Submission Workflow
+
+1. **User selects booth** on interactive floor map
+2. **Fills contact form** with phone, email (optional), company name (optional)
+3. **Submission created** with "pending" status
+4. **Admin reviews** in Filament panel
+5. **Bulk approve/reject** submissions or handle individually
+
+### Event Scheduling
+
+Events have date ranges and can be assigned to multiple halls. The system validates:
+
+- Hall scheduling conflicts (no double-booking)
+- Event date ranges (end date must be after start date)
+- Minimum date constraints (events must start in the future)
+
+## Project Structure
+
+```
+app/
+├── Filament/
+│   └── Resources/
+│       ├── Events/          # Event management
+│       ├── Halls/           # Hall management
+│       └── Submissions/     # Submission management
+│           ├── SubmissionResource.php
+│           ├── Tables/SubmissionsTable.php
+│           └── Schemas/SubmissionForm.php
+├── Http/Controllers/
+│   └── HomeController.php   # Public interface
+├── Models/
+│   ├── Event.php
+│   ├── Hall.php
+│   └── Submission.php
+resources/
+├── views/
+│   └── pages/
+│       └── home.blade.php   # Public event browsing
+├── css/
+│   └── app.css              # Tailwind CSS v4
+└── js/
+    └── app.js
+```
+
+## Environment Configuration
+
+Copy `.env.example` to `.env` and configure:
+
+- `APP_NAME` - Application name
+- `APP_URL` - Base URL
+- `DB_CONNECTION` - Database driver (default: sqlite)
+- `QUEUE_CONNECTION` - Queue driver (default: database)
+- `MAIL_*` - Email settings (default: log)
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. Follow PSR-12 coding standards (enforced by Laravel Pint)
+2. Write tests using Pest PHP
+3. Use Filament 4 conventions for admin resources
+4. Keep SVG files sanitized and secure
 
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Support
+
+For issues and feature requests, please use the project's issue tracker.

@@ -94,12 +94,56 @@ php artisan make:filament-page PageName                  # Create custom page
 php artisan make:filament-widget WidgetName              # Create dashboard widget
 ```
 
+**Filament 4 Resource Structure:**
+
+This project uses Filament 4's organized structure where resources are split into multiple files:
+
+- `app/Filament/Resources/{ModelName}/` - Resource directory
+  - `{ModelName}Resource.php` - Main resource class
+  - `Tables/{ModelName}sTable.php` - Table configuration (columns, filters, actions)
+  - `Schemas/{ModelName}Form.php` - Form schema configuration
+  - `Pages/` - Custom pages (List, Create, Edit)
+
+When customizing resources, edit the Table and Schema files rather than the main Resource class.
+
+### Domain Model
+
+The application manages event booth bookings with the following core models:
+
+**Event** (`app/Models/Event.php`):
+
+- Properties: name, starts_at, ends_at, status (draft/active/completed)
+- Uses soft deletes
+- Many-to-many relationship with Halls via `event_hall` pivot table
+- Has many Submissions
+
+**Hall** (`app/Models/Hall.php`):
+
+- Properties: name
+- Implements `HasMedia` for floor map SVG storage (via Spatie MediaLibrary)
+- Floor maps stored in `floor_map` media collection with server-side SVG sanitization
+- Many-to-many relationship with Events
+- Has many Submissions
+
+**Submission** (`app/Models/Submission.php`):
+
+- Represents booth booking requests (no user authentication required)
+- Properties: event_id, hall_id, booth_id (string), booth_name, phone_number, email (optional), company_name (optional), status (pending/approved/rejected)
+- Unique constraint on [event_id, hall_id, booth_id] prevents duplicate booth submissions
+- Belongs to Event and Hall
+
+**Key Design Decisions:**
+
+- Booths are NOT pre-registered in database; booth_id stores SVG element IDs (e.g., "A1", "B2")
+- Submissions are anonymous (identified by phone number, not user accounts)
+- Event-Hall scheduling conflicts are validated at the application level
+
 ### Application Structure
 
 - **Models**: `app/Models/` - Eloquent models
 - **Controllers**: `app/Http/Controllers/` - HTTP controllers (minimal usage due to Filament)
 - **Routes**: `routes/web.php` - Web routes (admin handled by Filament)
-- **Views**: `resources/views/` - Blade templates
+- **Views**: `resources/views/` - Blade templates (public-facing event/hall browsing)
 - **Frontend Assets**: `resources/css/` and `resources/js/` - Compiled via Vite
 - **Migrations**: `database/migrations/` - Database schema
 
@@ -147,6 +191,25 @@ php artisan db:seed                 # Run database seeders
 
 ## Frontend
 
+### Public-Facing Pages
+
+The application has a public home page (`/`) that displays event information and interactive floor maps:
+
+- [HomeController.php](app/Http/Controllers/HomeController.php) - Fetches first event with halls
+- [resources/views/pages/home.blade.php](resources/views/pages/home.blade.php) - Event browsing and booth selection UI
+
+**SVG Floor Map Integration:**
+
+Floor maps are uploaded as SVG files in the Filament admin and stored via Spatie MediaLibrary. The frontend:
+
+1. Fetches the SVG from the hall's media URL dynamically
+2. Parses SVG elements within a `g#Floor Map` group
+3. Makes booth elements (SVG `<g>` tags with IDs) interactive with hover and click handlers
+4. Shows a dialog modal for booth selection with form fields
+5. Filters booths by status (all/available/booked) - availability checking to be implemented
+
+**Important:** Booth IDs come from SVG element `id` attributes. The SVG structure must have interactive booth elements grouped under `g#Floor Map`.
+
 ### Asset Compilation
 
 The project uses **Vite** with **Tailwind CSS v4**:
@@ -173,6 +236,10 @@ Copy `.env.example` to `.env` and configure:
 ## Important Notes
 
 - **PHP Version**: Requires PHP 8.2 or higher
-- **Default Route**: The root route (`/`) serves a welcome view; the main application is at `/admin`
-- **Authentication**: Filament handles authentication; user creation may require seeders or Filament shield
+- **Public vs Admin Interface**:
+  - `/` - Public home page for event browsing and booth submissions (no authentication)
+  - `/admin` - Filament admin panel for managing events, halls, and submissions (authentication required)
+- **SVG Security**: Floor map SVGs are sanitized server-side via custom `SanitizeSvgAdder` class to prevent XSS attacks
+- **Booth System**: Booths are NOT stored in database - booth IDs reference SVG element IDs directly
+- **Submission Workflow**: Submissions start as "pending" and can be bulk approved/rejected in Filament admin
 - **Filament Upgrades**: Run `php artisan filament:upgrade` after updating Filament packages (automatically runs via Composer scripts)
