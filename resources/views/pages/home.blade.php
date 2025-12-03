@@ -16,9 +16,7 @@
 
 @section('content')
     <div class="flex flex-col items-center justify-start w-full h-full">
-        <div class="flex items-center justify-center w-full min-h-screen">
-            <div id="floormap" class="object-contain aspect-video"></div>
-        </div>
+        <div id="floormap" class="flex items-center justify-center w-full bg-black aspect-video"></div>
     </div>
 
     <!-- Dialog Modal -->
@@ -28,6 +26,7 @@
                 <h3 class="text-xl font-semibold text-gray-900">Block ID: <span id="dialogBlockId"></span></h3>
                 <button id="closeDialog" class="text-2xl text-gray-400 hover:text-gray-600">&times;</button>
             </div>
+
             <div class="px-6 py-4">
                 <!-- Add your form here -->
                 <div id="dialogContent">
@@ -46,6 +45,7 @@
                 .then(response => response.text())
                 .then(svgData => {
                     floormap.innerHTML = svgData;
+
                     console.log('floormap loaded successfully');
                 })
                 .catch(error => {
