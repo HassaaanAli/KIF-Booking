@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Media\SanitizeSvgAdder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\FileAdder;
@@ -29,5 +30,10 @@ class Hall extends Model implements HasMedia
         return app(SanitizeSvgAdder::class)
             ->setSubject($this)
             ->setFile($file);
+    }
+
+    public function events(): BelongsToMany
+    {
+        return $this->belongsToMany(Event::class)->withTimestamps();
     }
 }
