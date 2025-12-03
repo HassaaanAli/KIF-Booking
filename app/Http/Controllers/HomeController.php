@@ -13,7 +13,16 @@ class HomeController extends Controller
         $event = Event::with('halls')->first();
         $hall = $event?->halls->first();
 
-        return view('pages.home', compact('event', 'hall'));
+        // Get submissions for this event and hall
+        $submissions = [];
+        if ($event && $hall) {
+            $submissions = Submission::where('event_id', $event->id)
+                ->where('hall_id', $hall->id)
+                ->get()
+                ->keyBy('booth_id'); // Key by booth_id for easy lookup
+        }
+
+        return view('pages.home', compact('event', 'hall', 'submissions'));
     }
 
     public function storeSubmission(Request $request)

@@ -69,7 +69,7 @@
             </p>
         </div>
 
-        <!-- Legend -->
+        <!-- Legend with Filters -->
         <div class="flex flex-wrap gap-6 mb-6">
             <label class="flex items-center space-x-2 cursor-pointer">
                 <input type="radio" name="status" value="all"
@@ -84,7 +84,7 @@
             <label class="flex items-center space-x-2 cursor-pointer">
                 <input type="radio" name="status" value="booked"
                     class="w-4 h-4 text-red-600 border-gray-300 focus:ring-red-500">
-                <span class="text-sm text-gray-700">Booked</span>
+                <span class="text-sm text-gray-700">Booked </span>
             </label>
         </div>
 
@@ -180,6 +180,22 @@
                 <button id="closeDialog" type="button" class="text-2xl text-gray-400 hover:text-gray-600">&times;</button>
             </div>
 
+            <!-- Booked Message (hidden by default) -->
+            <div id="bookedMessage" class="hidden px-6 py-8 text-center">
+                <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full">
+                    <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </div>
+                <h4 class="mb-2 text-lg font-semibold text-gray-900">Booth Not Available</h4>
+                <p class="mb-6 text-gray-600">This booth has already been booked.</p>
+                <button id="bookedCloseBtn" type="button"
+                    class="px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-md hover:bg-gray-700">
+                    Close
+                </button>
+            </div>
+
+            <!-- Submission Form -->
             <form id="submissionForm" action="{{ route('submissions.store') }}" method="POST" class="px-6 py-4">
                 @csrf
                 <input type="hidden" name="event_id" value="{{ $event?->id }}">
@@ -231,6 +247,10 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const floormap = document.getElementById('floormap');
+            let interactiveElements = [];
+            let submissions = {};
+
             // Handle status radio button changes
             const statusRadios = document.querySelectorAll('input[name="status"]');
             statusRadios.forEach(radio => {
@@ -238,26 +258,45 @@
                     const url = new URL(window.location.href);
                     url.searchParams.set('status', this.value);
                     window.history.pushState({}, '', url);
+                    filterBooths(this.value);
                 });
             });
 
             // Set the correct radio button based on URL parameter
             const urlParams = new URLSearchParams(window.location.search);
-            const statusParam = urlParams.get('status');
+            const statusParam = urlParams.get('status') || 'all';
 
-            if (statusParam) {
-                const radio = document.querySelector(`input[name="status"][value="${statusParam}"]`);
-                if (radio) {
-                    radio.checked = true;
-                }
-            } else {
-                // Default to 'all' if no status parameter
-                const url = new URL(window.location.href);
-                url.searchParams.set('status', 'all');
-                window.history.replaceState({}, '', url);
+            const radio = document.querySelector(`input[name="status"][value="${statusParam}"]`);
+            if (radio) {
+                radio.checked = true;
             }
 
-            const floormap = document.getElementById('floormap');
+            // Filter booths based on status
+            function filterBooths(filterValue) {
+                interactiveElements.forEach(gElement => {
+                    const boothId = gElement.getAttribute('id');
+                    const submission = submissions[boothId];
+
+                    let shouldShow = true;
+
+                    if (filterValue === 'available') {
+                        // Show only booths without submission, or with rejected status
+                        shouldShow = !submission || submission.status === 'rejected';
+                    } else if (filterValue === 'booked') {
+                        // Show only booths with pending or approved status
+                        shouldShow = submission && (submission.status === 'pending' || submission.status ===
+                            'approved');
+                    }
+                    // If 'all', shouldShow remains true
+
+                    if (shouldShow) {
+                        gElement.style.display = '';
+                        gElement.style.opacity = '1';
+                    } else {
+                        gElement.style.display = 'none';
+                    }
+                });
+            }
             @if ($hall && $hall->getFirstMediaUrl('floor_map'))
                 fetch('{{ $hall->getFirstMediaUrl('floor_map') }}')
                     .then(response => response.text())
@@ -277,18 +316,41 @@
                 const svgElement = floormap.querySelector('svg');
                 if (svgElement) {
                     const floorMapGroup = svgElement.querySelector('g#Floor\\ Map, g[id="Floor Map"]');
-                    const interactiveElements = floorMapGroup ? floorMapGroup.querySelectorAll('g[id]') :
-                [];
+                    const elements = floorMapGroup ? floorMapGroup.querySelectorAll('g[id]') : [];
+                    interactiveElements = Array.from(elements);
 
                     console.log(`Found ${interactiveElements.length} interactive elements`);
+
+                    // Get submissions data from PHP
+                    submissions = @json($submissions);
+                    console.log('Submissions:', submissions);
 
                     // Add hover effects to each element
                     interactiveElements.forEach(gElement => {
                         const rect = gElement.querySelector('rect');
                         if (rect) {
-                            // Store original colors
-                            const originalFill = '#7F7F7F';
+                            const boothId = gElement.getAttribute('id');
+
+                            // Determine original color based on submission status
+                            let originalFill =
+                                '#7F7F7F'; // Default gray for rejected or no submission
                             const originalOpacity = '0.5';
+
+                            // Check if this booth has a submission
+                            if (submissions[boothId]) {
+                                const status = submissions[boothId].status;
+                                if (status === 'approved') {
+                                    originalFill = '#EF4444'; // Red
+                                } else if (status === 'pending') {
+                                    originalFill = '#F97316'; // Orange
+                                }
+                                // If rejected, keep gray (#7F7F7F)
+                            }
+
+                            // Set the booth color based on status
+                            rect.setAttribute('fill', originalFill);
+                            rect.setAttribute('fill-opacity', originalOpacity);
+
                             const hoverFill = '#3B82F6'; // Blue hover color to match legend
                             const hoverOpacity = '0.8';
 
@@ -309,13 +371,28 @@
                             gElement.addEventListener('click', function() {
                                 const blockId = gElement.getAttribute('id');
                                 const dialog = document.getElementById('blockDialog');
-                                const dialogBlockId = document.getElementById(
-                                    'dialogBlockId');
+                                const dialogBlockId = document.getElementById('dialogBlockId');
                                 const boothIdInput = document.getElementById('booth_id');
+                                const submissionForm = document.getElementById('submissionForm');
+                                const bookedMessage = document.getElementById('bookedMessage');
 
-                                // Set booth ID in dialog title and hidden input
+                                // Set booth ID in dialog title
                                 dialogBlockId.textContent = blockId;
                                 boothIdInput.value = blockId;
+
+                                // Check if booth is booked (pending or approved)
+                                const submission = submissions[blockId];
+                                const isBooked = submission && (submission.status === 'pending' || submission.status === 'approved');
+
+                                if (isBooked) {
+                                    // Show booked message, hide form
+                                    submissionForm.classList.add('hidden');
+                                    bookedMessage.classList.remove('hidden');
+                                } else {
+                                    // Show form, hide booked message
+                                    submissionForm.classList.remove('hidden');
+                                    bookedMessage.classList.add('hidden');
+                                }
 
                                 // Show dialog
                                 dialog.classList.remove('hidden');
@@ -323,6 +400,9 @@
                             });
                         }
                     });
+
+                    // Apply initial filter based on URL parameter
+                    filterBooths(statusParam);
                 }
             }, 100);
 
@@ -330,6 +410,7 @@
             const dialog = document.getElementById('blockDialog');
             const closeBtn = document.getElementById('closeDialog');
             const cancelBtn = document.getElementById('cancelBtn');
+            const bookedCloseBtn = document.getElementById('bookedCloseBtn');
             const submissionForm = document.getElementById('submissionForm');
 
             function closeDialog() {
@@ -341,6 +422,7 @@
 
             closeBtn.addEventListener('click', closeDialog);
             cancelBtn.addEventListener('click', closeDialog);
+            bookedCloseBtn.addEventListener('click', closeDialog);
 
             // Close dialog when clicking outside
             dialog.addEventListener('click', function(e) {
