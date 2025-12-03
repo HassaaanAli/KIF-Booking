@@ -36,6 +36,18 @@ class HomeController extends Controller
             'company_name' => 'nullable|string|max:255',
         ]);
 
+        // Check if phone number has 2 or more pending submissions for this event
+        $pendingCount = Submission::where('event_id', $validated['event_id'])
+            ->where('phone_number', $validated['phone_number'])
+            ->where('status', 'pending')
+            ->count();
+
+        if ($pendingCount >= 2) {
+            return redirect()->back()
+                ->withErrors(['phone_number' => 'You cannot request more than 2 booths at a time. Please wait for your pending submissions to be reviewed.'])
+                ->withInput();
+        }
+
         // Check if booth is already submitted for this event/hall
         $exists = Submission::where('event_id', $validated['event_id'])
             ->where('hall_id', $validated['hall_id'])

@@ -62,7 +62,7 @@
             <h1 class="mb-2 text-3xl font-bold text-gray-900">{{ $event?->name ?? 'No Event Available' }}</h1>
             <p class="text-gray-600">
                 @if ($hall)
-                    {{ $hall->name }} - Select your booth location on the interactive floor map
+                    {{ $hall->name }}
                 @else
                     No halls available for this event
                 @endif
@@ -76,15 +76,28 @@
                     class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" checked>
                 <span class="text-sm text-gray-700">All</span>
             </label>
-            <label class="flex items-center space-x-2 cursor-pointer">
+            {{-- <label class="flex items-center space-x-2 cursor-pointer">
                 <input type="radio" name="status" value="available"
                     class="w-4 h-4 text-gray-600 border-gray-300 focus:ring-gray-500">
-                <span class="text-sm text-gray-700">Available</span>
-            </label>
+                <span
+                    class="text-sm flex flex-row justify-center items-center gap-2.5 bg-white border border-[#2425FE] px-3 py-1 text-black rounded-4xl">
+                    Available</span>
+            </label> --}}
             <label class="flex items-center space-x-2 cursor-pointer">
                 <input type="radio" name="status" value="booked"
                     class="w-4 h-4 text-red-600 border-gray-300 focus:ring-red-500">
-                <span class="text-sm text-gray-700">Booked </span>
+                <span
+                    class="text-sm flex flex-row justify-center items-center gap-2.5 bg-[#EF4444] px-3 py-1 text-white rounded-4xl">
+                    Booked
+                </span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="radio" name="status" value="pending"
+                    class="w-4 h-4 text-red-600 border-gray-300 focus:ring-red-500">
+                <span
+                    class="text-sm flex flex-row justify-center items-center gap-2.5 bg-[#F97316] px-3 py-1 text-white rounded-4xl">
+                    Pending Approval
+                </span>
             </label>
         </div>
 
@@ -184,7 +197,9 @@
             <div id="bookedMessage" class="hidden px-6 py-8 text-center">
                 <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full">
                     <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                        </path>
                     </svg>
                 </div>
                 <h4 class="mb-2 text-lg font-semibold text-gray-900">Booth Not Available</h4>
@@ -284,8 +299,10 @@
                         shouldShow = !submission || submission.status === 'rejected';
                     } else if (filterValue === 'booked') {
                         // Show only booths with pending or approved status
-                        shouldShow = submission && (submission.status === 'pending' || submission.status ===
-                            'approved');
+                        shouldShow = submission && submission.status === 'approved';
+                    } else if (filterValue === 'pending') {
+                        // Show only booths with pending status
+                        shouldShow = submission && submission.status === 'pending';
                     }
                     // If 'all', shouldShow remains true
 
@@ -333,16 +350,18 @@
 
                             // Determine original color based on submission status
                             let originalFill =
-                                '#7F7F7F'; // Default gray for rejected or no submission
-                            const originalOpacity = '0.5';
+                                '#ffffff'; // Default gray for rejected or no submission
+                            let originalOpacity = '0';
 
                             // Check if this booth has a submission
                             if (submissions[boothId]) {
                                 const status = submissions[boothId].status;
                                 if (status === 'approved') {
                                     originalFill = '#EF4444'; // Red
+                                    originalOpacity = '0.8';
                                 } else if (status === 'pending') {
                                     originalFill = '#F97316'; // Orange
+                                    originalOpacity = '0.8';
                                 }
                                 // If rejected, keep gray (#7F7F7F)
                             }
@@ -371,10 +390,13 @@
                             gElement.addEventListener('click', function() {
                                 const blockId = gElement.getAttribute('id');
                                 const dialog = document.getElementById('blockDialog');
-                                const dialogBlockId = document.getElementById('dialogBlockId');
+                                const dialogBlockId = document.getElementById(
+                                    'dialogBlockId');
                                 const boothIdInput = document.getElementById('booth_id');
-                                const submissionForm = document.getElementById('submissionForm');
-                                const bookedMessage = document.getElementById('bookedMessage');
+                                const submissionForm = document.getElementById(
+                                    'submissionForm');
+                                const bookedMessage = document.getElementById(
+                                    'bookedMessage');
 
                                 // Set booth ID in dialog title
                                 dialogBlockId.textContent = blockId;
@@ -382,7 +404,8 @@
 
                                 // Check if booth is booked (pending or approved)
                                 const submission = submissions[blockId];
-                                const isBooked = submission && (submission.status === 'pending' || submission.status === 'approved');
+                                const isBooked = submission && (submission.status ===
+                                    'pending' || submission.status === 'approved');
 
                                 if (isBooked) {
                                     // Show booked message, hide form
