@@ -16,6 +16,8 @@ class Submission extends Model
         'email',
         'company_name',
         'status',
+        'payment_method',
+        'comment',
     ];
 
     public function event(): BelongsTo

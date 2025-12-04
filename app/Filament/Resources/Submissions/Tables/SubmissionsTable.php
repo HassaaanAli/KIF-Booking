@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Submissions\Tables;
 
-use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -10,7 +9,6 @@ use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Collection;
 
 class SubmissionsTable
 {
@@ -94,22 +92,6 @@ class SubmissionsTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    BulkAction::make('approve')
-                        ->label('Approve')
-                        ->icon('heroicon-o-check')
-                        ->color('success')
-                        ->action(fn (Collection $records) => $records->each->update(['status' => 'approved']))
-                        ->deselectRecordsAfterCompletion()
-                        ->requiresConfirmation(),
-
-                    BulkAction::make('reject')
-                        ->label('Reject')
-                        ->icon('heroicon-o-x-mark')
-                        ->color('danger')
-                        ->action(fn (Collection $records) => $records->each->update(['status' => 'rejected']))
-                        ->deselectRecordsAfterCompletion()
-                        ->requiresConfirmation(),
-
                     DeleteBulkAction::make(),
                 ]),
             ])

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Submissions\Schemas;
 
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -76,13 +77,53 @@ class SubmissionForm
                             ->required()
                             ->options([
                                 'pending' => 'Pending',
-                                'approved' => 'Approved',
-                                'rejected' => 'Rejected',
+                                'approved' => 'Approve',
+                                'rejected' => 'Reject',
                             ])
                             ->default('pending')
                             ->native(false)
                             ->label('Status')
                             ->helperText('Pending: Awaiting review. Approved: Confirmed. Rejected: Declined.')
+                            ->live()
+                            ->columnSpanFull(),
+
+                        Select::make('payment_method')
+                            ->options([
+                                'wire_transfer' => 'Wire Transfer',
+                                'link' => 'Link',
+                            ])
+                            ->native(false)
+                            ->label('Payment Method')
+                            ->helperText('Select how payment will be processed')
+                            ->visible(fn ($get): bool => $get('status') === 'approved')
+                            ->required(fn ($get): bool => $get('status') === 'approved')
+                            ->live()
+                            ->columnSpanFull(),
+
+                        Textarea::make('comment')
+                            ->label(function ($get): string {
+                                if ($get('status') === 'rejected') {
+                                    return 'Rejection Reason';
+                                }
+                                if ($get('status') === 'approved' && $get('payment_method') === 'link') {
+                                    return 'Payment Link';
+                                }
+
+                                return 'Comment/Notes';
+                            })
+                            ->helperText(function ($get): string {
+                                if ($get('status') === 'rejected') {
+                                    return 'Provide a reason for rejecting this submission';
+                                }
+                                if ($get('status') === 'approved' && $get('payment_method') === 'link') {
+                                    return 'Enter the payment link URL';
+                                }
+
+                                return 'Optional notes or additional information';
+                            })
+                            ->rows(4)
+                            ->visible(fn ($get): bool => in_array($get('status'), ['approved', 'rejected']))
+                            ->required(fn ($get): bool => in_array($get('status'), ['approved', 'rejected']))
                             ->columnSpanFull(),
                     ]),
             ]);
