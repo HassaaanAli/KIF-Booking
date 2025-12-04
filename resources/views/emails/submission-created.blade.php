@@ -92,13 +92,13 @@
 
         .button {
             display: inline-block;
-            padding: 14px 32px;
+            padding: 10px 24px;
             background-color: #f59e0b;
-            color: #ffffff;
+            color: #ffffff !important;
             text-decoration: none;
             border-radius: 6px;
             font-weight: 600;
-            font-size: 16px;
+            font-size: 14px;
             transition: background-color 0.3s ease;
         }
 
@@ -133,8 +133,8 @@
             }
 
             .button {
-                padding: 12px 24px;
-                font-size: 14px;
+                padding: 10px 20px;
+                font-size: 13px;
             }
         }
     </style>
